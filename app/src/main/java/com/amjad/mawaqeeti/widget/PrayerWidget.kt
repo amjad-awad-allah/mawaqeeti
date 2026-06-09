@@ -5,16 +5,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.*
+import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.*
-import androidx.glance.appwidget.action.*
-import androidx.glance.state.PreferencesGlanceStateDefinition
-import androidx.glance.action.*
+import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.layout.*
 import androidx.glance.text.*
 import androidx.glance.unit.ColorProvider
+import androidx.glance.state.GlanceStateDefinition
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
 import com.amjad.mawaqeeti.data.local.DataStoreManager
 import com.amjad.mawaqeeti.data.model.Timings
 import com.amjad.mawaqeeti.data.model.PrayerTime
@@ -22,134 +23,143 @@ import com.amjad.mawaqeeti.util.PrayerCalculator
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
 import java.time.LocalTime
-import java.util.Locale
 
 class PrayerWidget : GlanceAppWidget() {
-    override val stateDefinition = PreferencesGlanceStateDefinition
+    override val stateDefinition: GlanceStateDefinition<Preferences> = PreferencesGlanceStateDefinition
     
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val dataStore = DataStoreManager(context)
+        val prayerTimesJson = dataStore.prayerTimesJson.first() ?: ""
+        val prayerStates = dataStore.prayerStates.first()
+        val nextDayFajr = dataStore.nextDayFajrTime.first()
+        
+        // Fetch offsets to stay in sync with the app
+        val fOff = dataStore.fajrOffset.first()
+        val dOff = dataStore.dhuhrOffset.first()
+        val aOff = dataStore.asrOffset.first()
+        val mOff = dataStore.maghribOffset.first()
+        val iOff = dataStore.ishaOffset.first()
+        
         provideContent {
-            WidgetContent(context)
+            WidgetContent(context, prayerTimesJson, prayerStates, nextDayFajr, fOff, dOff, aOff, mOff, iOff)
         }
     }
 
     @Composable
-    private fun WidgetContent(context: Context) {
-        val prefs = currentState<Preferences>()
-        val prayerTimesJson = prefs[stringPreferencesKey("prayer_times_json")]
-        val prayerStatesJson = prefs[stringPreferencesKey("prayer_states")] // Simplified for widget
+    private fun WidgetContent(
+        context: Context, 
+        prayerTimesJson: String, 
+        prayerStates: Map<String, Boolean>,
+        nextDayFajr: String?,
+        fOff: Int, dOff: Int, aOff: Int, mOff: Int, iOff: Int
+    ) {
+        var nextPrayer: PrayerTime? = null
+        var timeRemaining = "--:--"
+        var isPrayed = false
+        var nextPrayerDayInd = false
         
-        var nextPrayerName = "---"
-        var nextPrayerTime = "--:--"
-        
-        if (prayerTimesJson != null) {
-            val gson = Gson()
-            val timings = gson.fromJson(prayerTimesJson, Timings::class.java)
-            // Note: In a full implementation we'd parse states too, but let's first get times working
-            val prayerList = listOf(
-                PrayerTime("الفجر", timings.Fajr, false),
-                PrayerTime("الظهر", timings.Dhuhr, false),
-                PrayerTime("العصر", timings.Asr, false),
-                PrayerTime("المغرب", timings.Maghrib, false),
-                PrayerTime("العشاء", timings.Isha, false)
-            )
-            val (next, _) = PrayerCalculator.findNextPrayer(prayerList, null)
-            next?.let {
-                nextPrayerName = it.name
-                nextPrayerTime = it.time
-            }
+        if (prayerTimesJson.isNotEmpty()) {
+            try {
+                val gson = Gson()
+                val timings = gson.fromJson(prayerTimesJson, Timings::class.java)
+                val prayerList = listOf(
+                    PrayerTime("الفجر", PrayerCalculator.applyOffsets(timings.Fajr, fOff), (prayerStates["Fajr"] ?: false)),
+                    PrayerTime("الظهر", PrayerCalculator.applyOffsets(timings.Dhuhr, dOff), (prayerStates["Dhuhr"] ?: false)),
+                    PrayerTime("العصر", PrayerCalculator.applyOffsets(timings.Asr, aOff), (prayerStates["Asr"] ?: false)),
+                    PrayerTime("المغرب", PrayerCalculator.applyOffsets(timings.Maghrib, mOff), (prayerStates["Maghrib"] ?: false)),
+                    PrayerTime("العشاء", PrayerCalculator.applyOffsets(timings.Isha, iOff), (prayerStates["Isha"] ?: false))
+                )
+                val (next, ind) = PrayerCalculator.findNextPrayer(prayerList, nextDayFajr)
+                nextPrayer = next
+                isPrayed = next?.isPrayed ?: false
+                nextPrayerDayInd = ind
+                
+                next?.let {
+                    val remainingFull = PrayerCalculator.calculateTimeRemaining(it.time, ind)
+                    timeRemaining = remainingFull.substring(0, 5) // HH:mm
+                }
+            } catch (e: Exception) { }
         }
 
-        // Premium Palette
         val deepBg = ComposeColor(0xFF0A0E14)
         val liquidAccent = ComposeColor(0xFF64FFDA)
-        val secondaryAccent = ComposeColor(0xFF2196F3)
-        val glassWhite = ComposeColor.White.copy(alpha = 0.15f)
+        val successGreen = ComposeColor(0xFF4CAF50)
+        val glassWhite = ComposeColor.White.copy(alpha = 0.1f)
 
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(deepBg)
-                .cornerRadius(32.dp)
+                .cornerRadius(24.dp)
         ) {
-            Box(
-                modifier = GlanceModifier
-                    .size(150.dp)
-                    .background(secondaryAccent.copy(alpha = 0.2f))
-                    .cornerRadius(75.dp)
-            ) {}
-
             Column(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalAlignment = Alignment.Vertical.CenterVertically
             ) {
                 Row(
                     modifier = GlanceModifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "مواقيتي",
-                        style = TextStyle(
-                            color = ColorProvider(liquidAccent),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        style = TextStyle(color = ColorProvider(liquidAccent), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     )
                     Spacer(modifier = GlanceModifier.defaultWeight())
-                    Text(
-                        text = "• القادمة",
-                        style = TextStyle(
-                            color = ColorProvider(ComposeColor.White.copy(alpha = 0.5f)),
-                            fontSize = 10.sp
+                    if (isPrayed) {
+                        Text(
+                            text = "تقبل الله منك 🤲",
+                            style = TextStyle(color = ColorProvider(successGreen), fontSize = 10.sp, fontWeight = FontWeight.Medium)
                         )
-                    )
+                    } else {
+                        Text(
+                            text = "باقي على ${nextPrayer?.name ?: "---"}",
+                            style = TextStyle(color = ColorProvider(ComposeColor.White.copy(alpha = 0.6f)), fontSize = 10.sp)
+                        )
+                    }
                 }
 
-                Spacer(modifier = GlanceModifier.height(12.dp))
+                Spacer(modifier = GlanceModifier.height(8.dp))
 
                 Column(
                     modifier = GlanceModifier
                         .fillMaxWidth()
                         .background(glassWhite)
-                        .padding(12.dp)
-                        .cornerRadius(20.dp),
+                        .padding(8.dp)
+                        .cornerRadius(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = nextPrayerName,
+                        text = if (isPrayed) "أتممت الصلاة" else timeRemaining,
                         style = TextStyle(
-                            color = ColorProvider(ComposeColor.White),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    )
-                    Text(
-                        text = nextPrayerTime,
-                        style = TextStyle(
-                            color = ColorProvider(liquidAccent),
-                            fontSize = 32.sp,
+                            color = ColorProvider(if (isPrayed) successGreen else ComposeColor.White),
+                            fontSize = 28.sp,
                             fontWeight = FontWeight.Bold
                         )
                     )
+                    if (!isPrayed) {
+                        Text(
+                            text = "ساعات : دقائق",
+                            style = TextStyle(color = ColorProvider(ComposeColor.White.copy(alpha = 0.4f)), fontSize = 9.sp)
+                        )
+                    }
                 }
 
-                Spacer(modifier = GlanceModifier.height(16.dp))
+                Spacer(modifier = GlanceModifier.height(12.dp))
 
                 Button(
-                    text = "تمت الصلاة ✓",
+                    text = if (isPrayed) "تمت بنجاح ✓" else "قمت بالصلاة",
                     onClick = actionRunCallback<PrayedActionCallback>(),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = ColorProvider(liquidAccent),
-                        contentColor = ColorProvider(deepBg)
+                        backgroundColor = ColorProvider(if (isPrayed) successGreen.copy(alpha = 0.2f) else liquidAccent),
+                        contentColor = ColorProvider(if (isPrayed) successGreen else deepBg)
                     ),
                     modifier = GlanceModifier
                         .fillMaxWidth()
-                        .height(48.dp)
-                        .cornerRadius(16.dp)
+                        .height(40.dp)
+                        .cornerRadius(12.dp)
                 )
             }
         }
@@ -159,22 +169,39 @@ class PrayerWidget : GlanceAppWidget() {
 class PrayedActionCallback : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         val dataStore = DataStoreManager(context)
+        
         val json = dataStore.prayerTimesJson.first()
+        val fOff = dataStore.fajrOffset.first()
+        val dOff = dataStore.dhuhrOffset.first()
+        val aOff = dataStore.asrOffset.first()
+        val mOff = dataStore.maghribOffset.first()
+        val iOff = dataStore.ishaOffset.first()
+        val states = dataStore.prayerStates.first()
+        val nextDayFajr = dataStore.nextDayFajrTime.first()
+
         if (json != null) {
             val gson = Gson()
             val timings = gson.fromJson(json, Timings::class.java)
-            val states = dataStore.prayerStates.first()
             val prayerList = listOf(
-                PrayerTime("Fajr", timings.Fajr, states["Fajr"] ?: false),
-                PrayerTime("Dhuhr", timings.Dhuhr, states["Dhuhr"] ?: false),
-                PrayerTime("Asr", timings.Asr, states["Asr"] ?: false),
-                PrayerTime("Maghrib", timings.Maghrib, states["Maghrib"] ?: false),
-                PrayerTime("Isha", timings.Isha, states["Isha"] ?: false)
+                PrayerTime("الفجر", PrayerCalculator.applyOffsets(timings.Fajr, fOff), (states["Fajr"] ?: false)),
+                PrayerTime("الظهر", PrayerCalculator.applyOffsets(timings.Dhuhr, dOff), (states["Dhuhr"] ?: false)),
+                PrayerTime("العصر", PrayerCalculator.applyOffsets(timings.Asr, aOff), (states["Asr"] ?: false)),
+                PrayerTime("المغرب", PrayerCalculator.applyOffsets(timings.Maghrib, mOff), (states["Maghrib"] ?: false)),
+                PrayerTime("العشاء", PrayerCalculator.applyOffsets(timings.Isha, iOff), (states["Isha"] ?: false))
             )
             
-            val (next, _) = PrayerCalculator.findNextPrayer(prayerList, null)
+            val (next, _) = PrayerCalculator.findNextPrayer(prayerList, nextDayFajr)
             next?.let {
-                dataStore.setPrayerPrayed(it.name, true)
+                val englishName = when(it.name) {
+                    "الفجر" -> "Fajr"
+                    "الظهر" -> "Dhuhr"
+                    "العصر" -> "Asr"
+                    "المغرب" -> "Maghrib"
+                    "العشاء" -> "Isha"
+                    else -> it.name
+                }
+                // TOGGLE state
+                dataStore.setPrayerPrayed(englishName, !it.isPrayed)
                 PrayerWidget().update(context, glanceId)
             }
         }

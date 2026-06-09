@@ -8,12 +8,17 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.glance.appwidget.updateAll
+import com.amjad.mawaqeeti.widget.PrayerWidget
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 @Singleton
 class PrayerRepository @Inject constructor(
     private val api: AladhanApi,
     private val dataStore: DataStoreManager,
-    private val gson: Gson
+    private val gson: Gson,
+    @ApplicationContext private val context: Context
 ) {
     private val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
     private val isoFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -45,6 +50,7 @@ class PrayerRepository @Inject constructor(
                 val json = gson.toJson(response.data.timings)
                 
                 dataStore.savePrayerTimes(json, nextFajr, todayStr)
+                PrayerWidget().updateAll(context)
                 
                 // Logic for streaks could be added here or in SplashScreenViewModel
             } catch (e: Exception) {

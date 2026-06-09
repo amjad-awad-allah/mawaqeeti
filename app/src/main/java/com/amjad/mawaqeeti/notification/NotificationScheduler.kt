@@ -31,8 +31,8 @@ class NotificationScheduler @Inject constructor(
     private fun scheduleMultiPhaseAlarms(prayer: PrayerTime) {
         val prayerTime = LocalTime.parse(prayer.time, DateTimeFormatter.ofPattern("HH:mm"))
         
-        // Phases: 0 (Athan), 15, 30, 60 minutes before
-        val phases = listOf(0, 5, 15, 30) // Adjusted for common needs
+        // Phases: 60, 30, 15, 5 minutes before
+        val phases = listOf(60, 30, 15, 5)
         
         phases.forEach { minutesBefore ->
             val nowTime = LocalTime.now()
@@ -81,7 +81,7 @@ class NotificationScheduler @Inject constructor(
     }
 
     fun cancelAlarmsForPrayer(prayerName: String) {
-        listOf(0, 5, 15, 30).forEach { minutesBefore ->
+        listOf(60, 30, 15, 5).forEach { minutesBefore ->
             val intent = Intent(context, AlarmReceiver::class.java)
             val pendingIntent = PendingIntent.getBroadcast(
                 context,

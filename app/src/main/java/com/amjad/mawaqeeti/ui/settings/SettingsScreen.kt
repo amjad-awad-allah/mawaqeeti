@@ -43,6 +43,7 @@ fun SettingsScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF03070C))) {
         // Subtle Background Animation
+        // lavalamb
         LavaLamp(
             modifier = Modifier.fillMaxSize().alpha(0.2f),
             mode = LavaMode.Vector(customColors = listOf(Color(0xFF1A263B), Color(0xFF0D1B2A))),

@@ -17,16 +17,20 @@ object PrayerCalculator {
     fun findNextPrayer(prayers: List<PrayerTime>, nextDayFajr: String?): Pair<PrayerTime, Boolean> {
         val now = LocalTime.now()
         
-        // Find the first prayer that hasn't happened yet
+        // Find the first prayer that hasn't happened yet AND isn't prayed
         for (prayer in prayers) {
             val prayerTime = LocalTime.parse(prayer.time, formatter)
-            if (now.isBefore(prayerTime)) {
+            if (now.isBefore(prayerTime) && !prayer.isPrayed) {
                 return prayer to false // isNextDay = false
             }
         }
         
-        // If all today's prayers passed, next is Fajr of tomorrow
-        return PrayerTime("Fajr", nextDayFajr ?: "04:30") to true // isNextDay = true
+        // If all today's prayers are passed or prayed, next is Fajr of tomorrow
+        // Note: We use Arabic for consistency if we are in Arabic mode, 
+        // but domain model uses English Fajr usually. 
+        // Let's use the first prayer from the list but with tomorrow's time.
+        val tomorrowFajr = prayers.first().copy(name = "الفجر", time = nextDayFajr ?: "04:30", isPrayed = false)
+        return tomorrowFajr to true // isNextDay = true
     }
 
     fun calculateTimeRemaining(prayerTime: String, isNextDay: Boolean): String {
@@ -48,8 +52,8 @@ object PrayerCalculator {
         return String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
-    fun getProgress(prayerStates: Map<String, Boolean>): Int {
-        return prayerStates.values.count { it }
+    fun getProgress(prayerStates: Map<*, *>): Int {
+        return prayerStates.values.count { it as Boolean }
     }
 
     fun getProgressPercentage(prayerStates: Map<String, Boolean>): Float {

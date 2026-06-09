@@ -36,17 +36,44 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.eventFlow.collect { event ->
+            when (event) {
+                is HomeViewModel.HomeEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(event.message)
+                }
+            }
+        }
+    }
+    
+    val (speed, particles, flowIntensity) = when (uiState.lavaMode) {
+        "FULL" -> Triple(0.6f, true, 0.6f)
+        "BATTERY_SAVER" -> Triple(0.2f, false, 0.1f)
+        else -> Triple(0.4f, false, 0.4f) // BALANCED
+    }
+
+    val lavaColors = when (uiState.progressCount) {
+        in 0..2 -> listOf(Color(0xFF0D1B2A), Color(0xFF1B263B)) // Calm Blue/Indico
+        in 3..4 -> listOf(Color(0xFFE65100), Color(0xFFFF9800)) // Encouraging Orange
+        else -> listOf(Color(0xFF2E7D32), Color(0xFFFFD700)) // Glorious Green/Gold for 5/5
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF03070C))) {
-        // Universal Liquid Background - Subtle and Deep
+        // Universal Liquid Background - Reactive to mode and progress
+        // lavalamb
         LavaLamp(
             modifier = Modifier.fillMaxSize().alpha(0.3f),
-            mode = LavaMode.Vector(customColors = listOf(Color(0xFF0D1B2A), Color(0xFF1B263B))),
-            speed = 0.2f
+            mode = LavaMode.Vector(customColors = lavaColors),
+            speed = speed,
+            enableParticles = particles,
+            flowIntensity = flowIntensity
         )
 
         Scaffold(
             containerColor = Color.Transparent,
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
@@ -56,6 +83,11 @@ fun HomeScreen(
                             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
                             color = Color.White
                         )
+                    },
+                    actions = {
+                        IconButton(onClick = onSettingsClick) {
+                            Icon(Icons.Default.Settings, "إعدادات", tint = Color.White)
+                        }
                     }
                 )
             }
@@ -68,8 +100,10 @@ fun HomeScreen(
                     .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // The Master Liquid Card
-                LiquidCountdownCard(uiState)
+                // The Master Liquid Card with Obstacle Deflection
+                Box(modifier = Modifier.padding(vertical = 16.dp)) {
+                    LiquidCountdownCard(uiState)
+                }
                 
                 Spacer(modifier = Modifier.height(32.dp))
                 
@@ -90,7 +124,6 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Prayer Items (No LazyColumn inside Scrollable Column)
                 uiState.prayers.forEach { prayer ->
                     ModernLiquidPrayerItem(
                         prayer = prayer,
@@ -122,6 +155,7 @@ fun LiquidCountdownCard(uiState: HomeUiState) {
             .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(40.dp))
     ) {
         // INTERNAL LIQUID - Acting as the "Soul" of the card
+        // lavalamb
         LavaLamp(
             modifier = Modifier.fillMaxSize(),
             mode = LavaMode.Vector(customColors = progressColors),
@@ -272,6 +306,7 @@ fun CompletionOverlay(onDismiss: () -> Unit) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(modifier = Modifier.size(240.dp).clip(CircleShape)) {
+                // lavalamb
                 LavaLamp(
                     modifier = Modifier.fillMaxSize(),
                     mode = LavaMode.Vector(customColors = listOf(Color(0xFFFBC02D), Color(0xFF66BB6A))),

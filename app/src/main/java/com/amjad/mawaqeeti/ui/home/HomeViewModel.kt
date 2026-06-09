@@ -12,22 +12,33 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.time.LocalTime
 import javax.inject.Inject
+import android.content.Context
+import androidx.glance.appwidget.updateAll
+import com.amjad.mawaqeeti.widget.PrayerWidget
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val dataStore: DataStoreManager,
     private val scheduler: NotificationScheduler,
-    private val gson: Gson
+    private val gson: Gson,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private val _eventFlow = MutableSharedFlow<HomeEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
+
     init {
         observeData()
         startTimer()
+    }
+
+    sealed class HomeEvent {
+        data class ShowSnackbar(val message: String) : HomeEvent()
     }
 
     private fun observeData() {
@@ -45,7 +56,7 @@ class HomeViewModel @Inject constructor(
             dataStore.ishaOffset
         ) { args ->
             val json = args[0] as String?
-            val states = args[1] as Map<String, Boolean>
+            val states = args[1] as Map<*, *>
             val nextFajr = args[2] as String?
             val currentStreak = args[3] as Int
             val bestStreak = args[4] as Int
@@ -60,11 +71,21 @@ class HomeViewModel @Inject constructor(
             if (json != null) {
                 val timings: Timings = gson.fromJson(json, Timings::class.java)
                 val prayerList = listOf(
-                    PrayerTime("Fajr", PrayerCalculator.applyOffsets(timings.Fajr, fOff), states["Fajr"] ?: false),
-                    PrayerTime("Dhuhr", PrayerCalculator.applyOffsets(timings.Dhuhr, dOff), states["Dhuhr"] ?: false),
-                    PrayerTime("Asr", PrayerCalculator.applyOffsets(timings.Asr, aOff), states["Asr"] ?: false),
-                    PrayerTime("Maghrib", PrayerCalculator.applyOffsets(timings.Maghrib, mOff), states["Maghrib"] ?: false),
-                    PrayerTime("Isha", PrayerCalculator.applyOffsets(timings.Isha, iOff), states["Isha"] ?: false)
+                    PrayerTime("الفجر", PrayerCalculator.applyOffsets(timings.Fajr, fOff),
+                        (states["Fajr"] ?: false) as Boolean
+                    ),
+                    PrayerTime("الظهر", PrayerCalculator.applyOffsets(timings.Dhuhr, dOff),
+                        (states["Dhuhr"] ?: false) as Boolean
+                    ),
+                    PrayerTime("العصر", PrayerCalculator.applyOffsets(timings.Asr, aOff),
+                        (states["Asr"] ?: false) as Boolean
+                    ),
+                    PrayerTime("المغرب", PrayerCalculator.applyOffsets(timings.Maghrib, mOff),
+                        (states["Maghrib"] ?: false) as Boolean
+                    ),
+                    PrayerTime("العشاء", PrayerCalculator.applyOffsets(timings.Isha, iOff),
+                        (states["Isha"] ?: false) as Boolean
+                    )
                 )
                 
                 val (next, isNextDay) = PrayerCalculator.findNextPrayer(prayerList, nextFajr)
@@ -100,9 +121,19 @@ class HomeViewModel @Inject constructor(
 
     fun togglePrayer(prayerName: String, isPrayed: Boolean) {
         viewModelScope.launch {
-            dataStore.setPrayerPrayed(prayerName, isPrayed)
+            val englishName = when(prayerName) {
+                "الفجر" -> "Fajr"
+                "الظهر" -> "Dhuhr"
+                "العصر" -> "Asr"
+                "المغرب" -> "Maghrib"
+                "العشاء" -> "Isha"
+                else -> prayerName
+            }
+            dataStore.setPrayerPrayed(englishName, isPrayed)
+            PrayerWidget().updateAll(context)
             if (isPrayed) {
-                scheduler.cancelAlarmsForPrayer(prayerName)
+                scheduler.cancelAlarmsForPrayer(englishName)
+                _eventFlow.emit(HomeEvent.ShowSnackbar("🤲 تقبل الله منك صلاة $prayerName"))
             } else {
                 // Reschedule if undone? For now just cancel if prayed.
                 // We could reschedule here if needed.

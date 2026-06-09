@@ -48,6 +48,7 @@ fun SplashScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF03070C))) {
         // High-Quality Ambient Liquid
+        // lavalamb
         LavaLamp(
             modifier = Modifier.fillMaxSize(),
             mode = LavaMode.Vector(customColors = listOf(Color(0xFF0D1B2A), Color(0xFF64FFDA).copy(alpha = 0.2f))),
