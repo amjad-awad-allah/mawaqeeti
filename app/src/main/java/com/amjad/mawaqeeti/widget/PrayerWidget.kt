@@ -7,11 +7,14 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.*
 import androidx.glance.appwidget.*
 import androidx.glance.appwidget.action.*
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.action.*
 import androidx.glance.layout.*
 import androidx.glance.text.*
 import androidx.glance.unit.ColorProvider
 import androidx.compose.ui.graphics.Color as ComposeColor
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.amjad.mawaqeeti.data.local.DataStoreManager
 import com.amjad.mawaqeeti.data.model.Timings
 import com.amjad.mawaqeeti.data.model.PrayerTime
@@ -22,6 +25,8 @@ import java.time.LocalTime
 import java.util.Locale
 
 class PrayerWidget : GlanceAppWidget() {
+    override val stateDefinition = PreferencesGlanceStateDefinition
+    
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             WidgetContent(context)
@@ -30,8 +35,31 @@ class PrayerWidget : GlanceAppWidget() {
 
     @Composable
     private fun WidgetContent(context: Context) {
-        val dataStore = currentState<DataStoreManager>() // This is simulated, we'll fetch manually for simplicity in this version
+        val prefs = currentState<Preferences>()
+        val prayerTimesJson = prefs[stringPreferencesKey("prayer_times_json")]
+        val prayerStatesJson = prefs[stringPreferencesKey("prayer_states")] // Simplified for widget
         
+        var nextPrayerName = "---"
+        var nextPrayerTime = "--:--"
+        
+        if (prayerTimesJson != null) {
+            val gson = Gson()
+            val timings = gson.fromJson(prayerTimesJson, Timings::class.java)
+            // Note: In a full implementation we'd parse states too, but let's first get times working
+            val prayerList = listOf(
+                PrayerTime("الفجر", timings.Fajr, false),
+                PrayerTime("الظهر", timings.Dhuhr, false),
+                PrayerTime("العصر", timings.Asr, false),
+                PrayerTime("المغرب", timings.Maghrib, false),
+                PrayerTime("العشاء", timings.Isha, false)
+            )
+            val (next, _) = PrayerCalculator.findNextPrayer(prayerList, null)
+            next?.let {
+                nextPrayerName = it.name
+                nextPrayerTime = it.time
+            }
+        }
+
         // Premium Palette
         val deepBg = ComposeColor(0xFF0A0E14)
         val liquidAccent = ComposeColor(0xFF64FFDA)
@@ -44,11 +72,10 @@ class PrayerWidget : GlanceAppWidget() {
                 .background(deepBg)
                 .cornerRadius(32.dp)
         ) {
-            // Fake "Liquid Blob" in background using a colored circle/box at the corner
             Box(
                 modifier = GlanceModifier
                     .size(150.dp)
-                    .background(secondaryAccent.copy(alpha = 0.3f))
+                    .background(secondaryAccent.copy(alpha = 0.2f))
                     .cornerRadius(75.dp)
             ) {}
 
@@ -74,7 +101,7 @@ class PrayerWidget : GlanceAppWidget() {
                     )
                     Spacer(modifier = GlanceModifier.defaultWeight())
                     Text(
-                        text = "• الصلاة القادمة",
+                        text = "• القادمة",
                         style = TextStyle(
                             color = ColorProvider(ComposeColor.White.copy(alpha = 0.5f)),
                             fontSize = 10.sp
@@ -84,7 +111,6 @@ class PrayerWidget : GlanceAppWidget() {
 
                 Spacer(modifier = GlanceModifier.height(12.dp))
 
-                // Modern Glass Card for the time
                 Column(
                     modifier = GlanceModifier
                         .fillMaxWidth()
@@ -94,15 +120,15 @@ class PrayerWidget : GlanceAppWidget() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "المغرب", // This will be dynamic soon
+                        text = nextPrayerName,
                         style = TextStyle(
                             color = ColorProvider(ComposeColor.White),
-                            fontSize = 20.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Medium
                         )
                     )
                     Text(
-                        text = "06:45",
+                        text = nextPrayerTime,
                         style = TextStyle(
                             color = ColorProvider(liquidAccent),
                             fontSize = 32.sp,
@@ -113,7 +139,6 @@ class PrayerWidget : GlanceAppWidget() {
 
                 Spacer(modifier = GlanceModifier.height(16.dp))
 
-                // Interactive Action Button
                 Button(
                     text = "تمت الصلاة ✓",
                     onClick = actionRunCallback<PrayedActionCallback>(),
