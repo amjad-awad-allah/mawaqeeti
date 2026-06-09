@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.content.Context
-import androidx.glance.appwidget.updateAll
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import com.amjad.mawaqeeti.widget.PrayerWidget
 import dagger.hilt.android.qualifiers.ApplicationContext
 
@@ -130,13 +130,25 @@ class HomeViewModel @Inject constructor(
                 else -> prayerName
             }
             dataStore.setPrayerPrayed(englishName, isPrayed)
-            PrayerWidget().updateAll(context)
+            
+            // Critical: Ensure the widget and local logic use the NEW state
+            val updatedPrayers = uiState.value.prayers.map { 
+                if (it.name == prayerName) it.copy(isPrayed = isPrayed) else it 
+            }
+            
+            // Priority update for widget
+            val manager = GlanceAppWidgetManager(context)
+            val glanceIds = manager.getGlanceIds(PrayerWidget::class.java)
+            glanceIds.forEach { id ->
+                PrayerWidget().update(context, id)
+            }
+            
             if (isPrayed) {
                 scheduler.cancelAlarmsForPrayer(englishName)
                 _eventFlow.emit(HomeEvent.ShowSnackbar("🤲 تقبل الله منك صلاة $prayerName"))
             } else {
-                // Reschedule if undone? For now just cancel if prayed.
-                // We could reschedule here if needed.
+                // Reschedule alarms using the updated list
+                scheduler.scheduleAlarmsForPrayers(updatedPrayers)
             }
             
             // Check if all prayed

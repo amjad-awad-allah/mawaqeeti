@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
+import android.net.Uri
 import androidx.core.app.NotificationCompat
 import com.amjad.mawaqeeti.R
 
@@ -21,15 +22,24 @@ class AlarmReceiver : BroadcastReceiver() {
         val channelId = "prayer_alerts"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        // Identify the correct sound based on timing
+        val soundUri = when (minutesBefore) {
+            60, 30 -> Uri.parse("android.resource://${context.packageName}/raw/bill")
+            15 -> Uri.parse("android.resource://${context.packageName}/raw/notime")
+            else -> RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        }
 
+        val channelName = "تنبيهات الصلاة"
         val channel = NotificationChannel(
             channelId,
-            "تنبيهات الصلاة",
+            channelName,
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "تنبيهات قبل موعد الصلاة"
+            description = "تنبيهات مخصصة لمواعيد الصلاة"
             enableVibration(true)
+            // Note: Since Android 8.0, sound is set on the channel. 
+            // For dynamic sounds per notification, we might need multiple channels or re-create it.
+            // But for these fixed phases, we will set it in the builder as well for compatibility.
             setSound(soundUri, null)
         }
         notificationManager.createNotificationChannel(channel)
@@ -42,7 +52,7 @@ class AlarmReceiver : BroadcastReceiver() {
             else -> "حان الآن موعد صلاة $prayerName"
         }
 
-        val notification = NotificationCompat.Builder(context, channelId)
+        val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("تذكير الصلاة - $prayerName")
             .setContentText(message)
@@ -51,10 +61,17 @@ class AlarmReceiver : BroadcastReceiver() {
             .setSound(soundUri)
             .setVibrate(longArrayOf(1000, 1000, 1000))
             .setAutoCancel(true)
-            .build()
-            .apply {
-                flags = flags or NotificationCompat.FLAG_INSISTENT // Plays sound until cancelled or opened
-            }
+
+        // Limit 'notime' alert to 5 seconds
+        if (minutesBefore == 15) {
+            builder.setTimeoutAfter(5000)
+        }
+
+        val notification = builder.build()
+
+        if (minutesBefore != 15) {
+            notification.flags = notification.flags or NotificationCompat.FLAG_INSISTENT
+        }
 
         notificationManager.notify(prayerName.hashCode() + minutesBefore, notification)
     }

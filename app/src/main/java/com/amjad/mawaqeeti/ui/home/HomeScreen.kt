@@ -107,11 +107,6 @@ fun HomeScreen(
                 
                 Spacer(modifier = Modifier.height(32.dp))
                 
-                // Progress Section
-                QuickStatsSection(uiState)
-
-                Spacer(modifier = Modifier.height(24.dp))
-                
                 // Prayer List Headers
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -197,40 +192,11 @@ fun LiquidCountdownCard(uiState: HomeUiState) {
                 ),
                 color = Color.White
             )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.LocalFireDepartment, "Streak", tint = Color(0xFFFFD54F), modifier = Modifier.size(24.dp))
-                Spacer(Modifier.width(4.dp))
-                Text("${uiState.streak} يوم متتالي", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            }
         }
     }
 }
 
-@Composable
-fun QuickStatsSection(uiState: HomeUiState) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        StatCard("الإنجاز اليومي", "${uiState.progressCount}/5", Modifier.weight(1f), Color(0xFF64FFDA))
-        StatCard("أفضل أداء", "${uiState.bestStreak}", Modifier.weight(1f), Color(0xFF2196F3))
-    }
-}
-
-@Composable
-fun StatCard(label: String, value: String, modifier: Modifier, accent: Color) {
-    Surface(
-        modifier = modifier,
-        color = Color.White.copy(alpha = 0.05f),
-        shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(label, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)
-            Text(value, color = accent, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        }
-    }
-}
+// QuickStatsSection and StatCard removed temporarily as requested
 
 @Composable
 fun ModernLiquidPrayerItem(prayer: PrayerTime, isNext: Boolean, onPrayed: () -> Unit) {
