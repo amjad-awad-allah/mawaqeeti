@@ -32,6 +32,7 @@ import com.example.lavalamp.LavaMode
 @Composable
 fun HomeScreen(
     onSettingsClick: () -> Unit,
+    onTestClick: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -85,8 +86,20 @@ fun HomeScreen(
                         )
                     },
                     actions = {
-                        IconButton(onClick = onSettingsClick) {
-                            Icon(Icons.Default.Settings, "إعدادات", tint = Color.White)
+                        IconButton(
+                            onClick = onTestClick,
+                            modifier = Modifier.background(Color.White.copy(alpha = 0.05f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.BugReport, "Test", tint = Color.White)
+                        }
+                        
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        IconButton(
+                            onClick = onSettingsClick,
+                            modifier = Modifier.background(Color.White.copy(alpha = 0.05f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.Settings, "Settings", tint = Color.White)
                         }
                     }
                 )

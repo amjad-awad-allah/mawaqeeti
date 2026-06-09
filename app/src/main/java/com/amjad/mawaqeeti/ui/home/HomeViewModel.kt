@@ -91,6 +91,9 @@ class HomeViewModel @Inject constructor(
                 val (next, isNextDay) = PrayerCalculator.findNextPrayer(prayerList, nextFajr)
                 val progress = PrayerCalculator.getProgress(states)
                 
+                // Automatically schedule alarms whenever data is updated/loaded
+                scheduler.scheduleAlarmsForPrayers(prayerList)
+
                 _uiState.update { 
                     it.copy(
                         prayers = prayerList,

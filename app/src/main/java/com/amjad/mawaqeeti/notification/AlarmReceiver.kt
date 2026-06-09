@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
 import androidx.core.app.NotificationCompat
@@ -19,17 +20,37 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     private fun showNotification(context: Context, prayerName: String, minutesBefore: Int) {
-        val channelId = "prayer_alerts"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Identify the correct sound based on timing
-        val soundUri = when (minutesBefore) {
-            60, 30 -> Uri.parse("android.resource://${context.packageName}/raw/bill")
-            15 -> Uri.parse("android.resource://${context.packageName}/raw/notime")
-            else -> RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        // Identify the correct sound and unique channel for each phase
+        val (soundUri, channelId, channelName) = when (minutesBefore) {
+            60, 30 -> Triple(
+                Uri.parse("android.resource://${context.packageName}/raw/bill"),
+                "prayer_alerts_bill",
+                "تنبيهات (ساعة/نصف ساعة)"
+            )
+            15 -> Triple(
+                Uri.parse("android.resource://${context.packageName}/raw/notime"),
+                "prayer_alerts_notime",
+                "تنبيهات (15 دقيقة)"
+            )
+            0 -> Triple(
+                Uri.parse("android.resource://${context.packageName}/raw/athan"),
+                "prayer_alerts_athan",
+                "تنبيه الأذان"
+            )
+            else -> Triple(
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                "prayer_alerts_default",
+                "تنبيهات الأذان"
+            )
         }
 
-        val channelName = "تنبيهات الصلاة"
+        val audioAttributes = AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+            .build()
+
         val channel = NotificationChannel(
             channelId,
             channelName,
@@ -37,10 +58,7 @@ class AlarmReceiver : BroadcastReceiver() {
         ).apply {
             description = "تنبيهات مخصصة لمواعيد الصلاة"
             enableVibration(true)
-            // Note: Since Android 8.0, sound is set on the channel. 
-            // For dynamic sounds per notification, we might need multiple channels or re-create it.
-            // But for these fixed phases, we will set it in the builder as well for compatibility.
-            setSound(soundUri, null)
+            setSound(soundUri, audioAttributes)
         }
         notificationManager.createNotificationChannel(channel)
 

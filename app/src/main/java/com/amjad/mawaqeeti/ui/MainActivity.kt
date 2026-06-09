@@ -18,6 +18,7 @@ import com.amjad.mawaqeeti.ui.home.HomeScreen
 import com.amjad.mawaqeeti.ui.settings.SettingsScreen
 import com.amjad.mawaqeeti.ui.splash.SplashScreen
 import com.amjad.mawaqeeti.ui.theme.ThemeMawaqeeti
+import com.amjad.mawaqeeti.ui.test.TestScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -81,11 +82,17 @@ fun MawaqeetiNavigation() {
             HomeScreen(
                 onSettingsClick = {
                     navController.navigate("settings")
+                },
+                onTestClick = {
+                    navController.navigate("test_screen")
                 }
             )
         }
         composable("settings") {
             SettingsScreen(onBack = { navController.popBackStack() })
+        }
+        composable("test_screen") {
+            TestScreen(onBack = { navController.popBackStack() })
         }
     }
 }

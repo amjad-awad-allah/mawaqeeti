@@ -26,23 +26,21 @@ class BootReceiver : BroadcastReceiver() {
                 val timings = gson.fromJson(json, Timings::class.java)
                 val states = dataStore.prayerStates.first()
                 
-                // Reschedule for each prayer if not already prayed
-                listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha").forEach { name ->
-                    if (states[name] == false) {
-                        val time = when(name) {
-                            "Fajr" -> timings.Fajr
-                            "Dhuhr" -> timings.Dhuhr
-                            "Asr" -> timings.Asr
-                            "Maghrib" -> timings.Maghrib
-                            "Isha" -> timings.Isha
-                            else -> ""
-                        }
-                        // We need a PrayerTime object, but Note: 
-                        // schedulePrayerAlarms takes PrayerTime. 
-                        // Minimal fix:
-                        // scheduler.schedulePrayerAlarms(PrayerTime(name, time))
-                    }
-                }
+                val fOff = dataStore.fajrOffset.first()
+                val dOff = dataStore.dhuhrOffset.first()
+                val aOff = dataStore.asrOffset.first()
+                val mOff = dataStore.maghribOffset.first()
+                val iOff = dataStore.ishaOffset.first()
+
+                val prayerList = listOf(
+                    com.amjad.mawaqeeti.data.model.PrayerTime("الفجر", com.amjad.mawaqeeti.util.PrayerCalculator.applyOffsets(timings.Fajr, fOff), (states["Fajr"] ?: false)),
+                    com.amjad.mawaqeeti.data.model.PrayerTime("الظهر", com.amjad.mawaqeeti.util.PrayerCalculator.applyOffsets(timings.Dhuhr, dOff), (states["Dhuhr"] ?: false)),
+                    com.amjad.mawaqeeti.data.model.PrayerTime("العصر", com.amjad.mawaqeeti.util.PrayerCalculator.applyOffsets(timings.Asr, aOff), (states["Asr"] ?: false)),
+                    com.amjad.mawaqeeti.data.model.PrayerTime("المغرب", com.amjad.mawaqeeti.util.PrayerCalculator.applyOffsets(timings.Maghrib, mOff), (states["Maghrib"] ?: false)),
+                    com.amjad.mawaqeeti.data.model.PrayerTime("العشاء", com.amjad.mawaqeeti.util.PrayerCalculator.applyOffsets(timings.Isha, iOff), (states["Isha"] ?: false))
+                )
+                
+                scheduler.scheduleAlarmsForPrayers(prayerList)
             }
         }
     }

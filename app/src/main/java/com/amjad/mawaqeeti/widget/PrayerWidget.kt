@@ -168,24 +168,22 @@ class PrayerWidget : GlanceAppWidget() {
                     }
                 }
 
-                Spacer(modifier = GlanceModifier.height(10.dp))
+                if (!isPrayed) {
+                    Spacer(modifier = GlanceModifier.height(12.dp))
 
-                Button(
-                    text = when {
-                        isPending -> "جاري المعالجة..."
-                        isPrayed -> "إلغاء التمام"
-                        else -> "قمت بالصلاة"
-                    },
-                    onClick = actionRunCallback<PrayedActionCallback>(),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = ColorProvider(if (isPrayed || isPending) ComposeColor.White.copy(alpha = 0.1f) else liquidAccent),
-                        contentColor = ColorProvider(if (isPrayed || isPending) ComposeColor.White else deepBg)
-                    ),
-                    modifier = GlanceModifier
-                        .fillMaxWidth()
-                        .height(38.dp)
-                        .cornerRadius(12.dp)
-                )
+                    Button(
+                        text = if (isPending) "جاري المعالجة..." else "قمت بالصلاة",
+                        onClick = actionRunCallback<PrayedActionCallback>(),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = ColorProvider(if (isPending) ComposeColor.White.copy(alpha = 0.1f) else liquidAccent),
+                            contentColor = ColorProvider(if (isPending) ComposeColor.White else deepBg)
+                        ),
+                        modifier = GlanceModifier
+                            .fillMaxWidth()
+                            .height(38.dp)
+                            .cornerRadius(12.dp)
+                    )
+                }
             }
         }
     }
