@@ -17,24 +17,24 @@ object PrayerCalculator {
     fun findNextPrayer(prayers: List<PrayerTime>, nextDayFajr: String?): Pair<PrayerTime, Boolean> {
         val now = LocalTime.now()
         
-        // Find the first prayer that occurs in the FUTURE and is NOT prayed
         for (prayer in prayers) {
             val prayerTime = LocalTime.parse(prayer.time, formatter)
             if (now.isBefore(prayerTime)) {
-                if (!prayer.isPrayed) {
-                    return prayer to false // Valid upcoming unprayed prayer
-                } else {
-                    // This prayer is in the future but already marked as done, 
-                    // so we keep looking for the next one.
-                    continue 
-                }
+                return prayer to false
             }
         }
         
-        // If all today's prayers are in the past OR already prayed, 
-        // the next prayer is tomorrow's Fajr
         val tomorrowFajr = prayers.first().copy(name = "الفجر", time = nextDayFajr ?: "04:30", isPrayed = false)
         return tomorrowFajr to true
+    }
+
+    fun findActivePrayer(prayers: List<PrayerTime>): PrayerTime? {
+        val now = LocalTime.now()
+        // The active prayer is the latest one that has already started
+        return prayers.lastOrNull { 
+            val prayerTime = LocalTime.parse(it.time, formatter)
+            now.isAfter(prayerTime) || now == prayerTime
+        }
     }
 
     fun calculateTimeRemaining(prayerTime: String, isNextDay: Boolean): String {

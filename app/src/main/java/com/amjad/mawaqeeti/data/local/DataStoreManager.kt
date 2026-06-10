@@ -84,11 +84,16 @@ class DataStoreManager @Inject constructor(
 
     suspend fun savePrayerTimes(json: String, nextFajr: String, date: String) {
         context.dataStore.edit { prefs ->
+            val lastDate = prefs[LAST_UPDATE_DATE]
+            
             prefs[PRAYER_TIMES_JSON] = json
             prefs[NEXT_DAY_FAJR_TIME] = nextFajr
             prefs[LAST_UPDATE_DATE] = date
-            // Reset prayer states for a new day if date is different
-            resetPrayerStates(prefs)
+            
+            // Only reset prayer states if the date is actually different from the last update
+            if (lastDate != date) {
+                resetPrayerStates(prefs)
+            }
         }
     }
 
