@@ -20,6 +20,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.lavalamp.LavaLamp
 import com.example.lavalamp.LavaMode
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.amjad.mawaqeeti.widget.PrayerWidgetReceiver
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +49,6 @@ fun SettingsScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF03070C))) {
         // Subtle Background Animation
-        // lavalamb
         LavaLamp(
             modifier = Modifier.fillMaxSize().alpha(0.2f),
             mode = LavaMode.Vector(customColors = listOf(Color(0xFF1A263B), Color(0xFF0D1B2A))),
@@ -135,9 +140,41 @@ fun SettingsScreen(
                     }
                 }
 
+                // Widget Management Section
+                SettingsSection(title = "الإضافات (Widget)", icon = Icons.Default.Widgets) {
+                    val context = LocalContext.current
+                    Text(
+                        "أضف تطبيق 'مواقيتي' المصغر مباشرة إلى شاشتك الرئيسية للوصول السريع.",
+                        color = Color.White.copy(alpha = 0.6f),
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Button(
+                        onClick = { requestPinAppWidget(context) },
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1f))
+                    ) {
+                        Icon(Icons.Default.Add, null, tint = Color.White)
+                        Spacer(Modifier.width(8.dp))
+                        Text("إضافة الويدجت للشاشة الرئيسية", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                }
+
                 Spacer(Modifier.height(40.dp))
             }
         }
+    }
+}
+
+fun requestPinAppWidget(context: Context) {
+    val appWidgetManager = context.getSystemService(AppWidgetManager::class.java)
+    val myProvider = ComponentName(context, PrayerWidgetReceiver::class.java)
+
+    if (appWidgetManager.isRequestPinAppWidgetSupported) {
+        appWidgetManager.requestPinAppWidget(myProvider, null, null)
+    } else {
+        Toast.makeText(context, "واجهة جهازك لا تدعم الإضافة التلقائية، يرجى إضافته يدوياً", Toast.LENGTH_SHORT).show()
     }
 }
 
