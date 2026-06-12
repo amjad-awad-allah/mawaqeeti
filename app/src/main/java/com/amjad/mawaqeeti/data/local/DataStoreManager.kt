@@ -42,6 +42,9 @@ class DataStoreManager @Inject constructor(
         val ASR_OFFSET = intPreferencesKey("asrOffset")
         val MAGHRIB_OFFSET = intPreferencesKey("maghribOffset")
         val ISHA_OFFSET = intPreferencesKey("ishaOffset")
+        
+        val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+        val ADHAN_ENABLED = booleanPreferencesKey("adhan_enabled")
     }
 
     // Getters
@@ -51,6 +54,9 @@ class DataStoreManager @Inject constructor(
     val prayerTimesJson: Flow<String?> = context.dataStore.data.map { it[PRAYER_TIMES_JSON] }
     val nextDayFajrTime: Flow<String?> = context.dataStore.data.map { it[NEXT_DAY_FAJR_TIME] }
     val lastUpdateDate: Flow<String?> = context.dataStore.data.map { it[LAST_UPDATE_DATE] }
+
+    val notificationsEnabled: Flow<Boolean> = context.dataStore.data.map { it[NOTIFICATIONS_ENABLED] ?: true }
+    val adhanEnabled: Flow<Boolean> = context.dataStore.data.map { it[ADHAN_ENABLED] ?: true }
 
     val prayerStates: Flow<Map<String, Boolean>> = context.dataStore.data.map { prefs ->
         mapOf(
@@ -141,5 +147,13 @@ class DataStoreManager @Inject constructor(
                 "Isha" -> prefs[ISHA_OFFSET] = offset
             }
         }
+    }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[NOTIFICATIONS_ENABLED] = enabled }
+    }
+
+    suspend fun setAdhanEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[ADHAN_ENABLED] = enabled }
     }
 }

@@ -24,6 +24,9 @@ class SettingsViewModel @Inject constructor(
     val maghribOffset = dataStore.maghribOffset.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), 0)
     val ishaOffset = dataStore.ishaOffset.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), 0)
 
+    val notificationsEnabled = dataStore.notificationsEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), true)
+    val adhanEnabled = dataStore.adhanEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), true)
+
     fun updateLocation(city: String, country: String, method: Int) {
         viewModelScope.launch {
             dataStore.updateLocation(city, country, method)
@@ -45,6 +48,18 @@ class SettingsViewModel @Inject constructor(
                 "Maghrib" -> dataStore.setOffset("Maghrib", value)
                 "Isha" -> dataStore.setOffset("Isha", value)
             }
+        }
+    }
+
+    fun setNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStore.setNotificationsEnabled(enabled)
+        }
+    }
+
+    fun setAdhanEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStore.setAdhanEnabled(enabled)
         }
     }
 }

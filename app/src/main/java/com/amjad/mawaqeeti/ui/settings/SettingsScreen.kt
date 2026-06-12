@@ -26,6 +26,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import com.amjad.mawaqeeti.widget.PrayerWidgetReceiver
+import com.example.lavalamp.LavaContainerMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,14 +45,17 @@ fun SettingsScreen(
     val mOff by viewModel.maghribOffset.collectAsState()
     val iOff by viewModel.ishaOffset.collectAsState()
 
+    val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
+    val adhanEnabled by viewModel.adhanEnabled.collectAsState()
+
     var tempCity by remember(city) { mutableStateOf(city) }
     var tempCountry by remember(country) { mutableStateOf(country) }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF03070C))) {
         // Subtle Background Animation
         LavaLamp(
+            containerMode = LavaContainerMode.AMBIENT_BACKGROUND ,// No glass bottle,
             modifier = Modifier.fillMaxSize().alpha(0.2f),
-            mode = LavaMode.Vector(customColors = listOf(Color(0xFF1A263B), Color(0xFF0D1B2A))),
             speed = 0.15f
         )
 
@@ -138,6 +142,23 @@ fun SettingsScreen(
                             }
                         }
                     }
+                }
+
+                // Notifications Section
+                SettingsSection(title = "التنبيهات والأذان", icon = Icons.Default.Notifications) {
+                    ToggleSettingItem(
+                        title = "تفعيل التنبيهات",
+                        subtitle = "تنبيهات قبل موعد الصلاة",
+                        checked = notificationsEnabled,
+                        onCheckedChange = { viewModel.setNotificationsEnabled(it) }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    ToggleSettingItem(
+                        title = "صوت الأذان",
+                        subtitle = "تشغيل الأذان عند الموعد",
+                        checked = adhanEnabled,
+                        onCheckedChange = { viewModel.setAdhanEnabled(it) }
+                    )
                 }
 
                 // Widget Management Section
@@ -246,5 +267,29 @@ fun OffsetItem(label: String, value: Int, onUpdate: (Int) -> Unit) {
                 modifier = Modifier.background(Color.White.copy(alpha = 0.05f), CircleShape).size(36.dp)
             ) { Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.size(18.dp)) }
         }
+    }
+}
+
+@Composable
+fun ToggleSettingItem(title: String, subtitle: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(subtitle, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color(0xFF64FFDA),
+                checkedTrackColor = Color(0xFF64FFDA).copy(alpha = 0.3f),
+                uncheckedThumbColor = Color.White.copy(alpha = 0.6f),
+                uncheckedTrackColor = Color.White.copy(alpha = 0.1f)
+            )
+        )
     }
 }

@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.lavalamp.LavaContainerMode
 import com.example.lavalamp.LavaLamp
 import com.example.lavalamp.LavaMode
 
@@ -51,8 +52,10 @@ fun SplashScreen(
         // lavalamb
         LavaLamp(
             modifier = Modifier.fillMaxSize(),
-            mode = LavaMode.Vector(customColors = listOf(Color(0xFF0D1B2A), Color(0xFF64FFDA).copy(alpha = 0.2f))),
-            speed = 0.4f
+            containerMode = LavaContainerMode.AMBIENT_BACKGROUND ,// No glass bottle,
+            speed = 0.3f,
+            flowIntensity = 0.2f,
+
         )
 
         Column(

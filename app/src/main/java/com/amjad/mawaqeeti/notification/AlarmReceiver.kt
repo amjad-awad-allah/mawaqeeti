@@ -10,16 +10,30 @@ import android.media.RingtoneManager
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import com.amjad.mawaqeeti.R
+import com.amjad.mawaqeeti.data.local.DataStoreManager
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val prayerName = intent.getStringExtra("PRAYER_NAME") ?: return
         val minutesBefore = intent.getIntExtra("MINUTES_BEFORE", 0)
 
-        showNotification(context, prayerName, minutesBefore)
+        val dataStore = DataStoreManager(context)
+        runBlocking {
+            val notificationsEnabled = dataStore.notificationsEnabled.first()
+            val adhanEnabled = dataStore.adhanEnabled.first()
+
+            if (!notificationsEnabled) return@runBlocking
+
+            // If it's Adhan time but Adhan sound is disabled, we change the soundUri or behavior
+            val effectiveAdhanEnabled = if (minutesBefore == 0) adhanEnabled else true
+
+            showNotification(context, prayerName, minutesBefore, effectiveAdhanEnabled)
+        }
     }
 
-    private fun showNotification(context: Context, prayerName: String, minutesBefore: Int) {
+    private fun showNotification(context: Context, prayerName: String, minutesBefore: Int, soundEnabled: Boolean) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Identify the correct sound and unique channel for each phase
@@ -46,6 +60,8 @@ class AlarmReceiver : BroadcastReceiver() {
             )
         }
 
+        val finalSoundUri = if (soundEnabled) soundUri else null
+
         val audioAttributes = AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
@@ -58,7 +74,11 @@ class AlarmReceiver : BroadcastReceiver() {
         ).apply {
             description = "تنبيهات مخصصة لمواعيد الصلاة"
             enableVibration(true)
-            setSound(soundUri, audioAttributes)
+            if (finalSoundUri != null) {
+                setSound(finalSoundUri, audioAttributes)
+            } else {
+                setSound(null, null)
+            }
         }
         notificationManager.createNotificationChannel(channel)
 
@@ -76,9 +96,12 @@ class AlarmReceiver : BroadcastReceiver() {
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setSound(soundUri)
             .setVibrate(longArrayOf(1000, 1000, 1000))
             .setAutoCancel(true)
+
+        if (finalSoundUri != null) {
+            builder.setSound(finalSoundUri)
+        }
 
         // Limit 'notime' alert to 5 seconds
         if (minutesBefore == 15) {

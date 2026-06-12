@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.amjad.mawaqeeti.data.model.PrayerTime
+import com.example.lavalamp.LavaContainerMode
 import com.example.lavalamp.LavaLamp
 import com.example.lavalamp.LavaLampStyle
 import com.example.lavalamp.LavaMode
@@ -65,11 +66,9 @@ fun HomeScreen(
         // Universal Liquid Background - Reactive to mode and progress
         // lavalamb
         LavaLamp(
+            containerMode = LavaContainerMode.AMBIENT_BACKGROUND ,// No glass bottle,
             modifier = Modifier.fillMaxSize().alpha(0.3f),
-            mode = LavaMode.Vector(customColors = lavaColors),
             speed = speed,
-            enableParticles = particles,
-            flowIntensity = flowIntensity
         )
 
         Scaffold(
@@ -165,8 +164,8 @@ fun LiquidCountdownCard(uiState: HomeUiState) {
         // INTERNAL LIQUID - Acting as the "Soul" of the card
         // lavalamb
         LavaLamp(
+            containerMode = LavaContainerMode.AMBIENT_BACKGROUND ,// No glass bottle,
             modifier = Modifier.fillMaxSize(),
-            mode = LavaMode.Vector(customColors = progressColors),
             speed = 0.6f
         )
         
@@ -287,8 +286,8 @@ fun CompletionOverlay(onDismiss: () -> Unit) {
             Box(modifier = Modifier.size(240.dp).clip(CircleShape)) {
                 // lavalamb
                 LavaLamp(
+                    containerMode = LavaContainerMode.AMBIENT_BACKGROUND ,// No glass bottle,
                     modifier = Modifier.fillMaxSize(),
-                    mode = LavaMode.Vector(customColors = listOf(Color(0xFFFBC02D), Color(0xFF66BB6A))),
                     speed = 1f
                 )
                 Icon(
