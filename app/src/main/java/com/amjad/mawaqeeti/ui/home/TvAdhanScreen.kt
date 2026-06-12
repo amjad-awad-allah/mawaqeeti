@@ -46,6 +46,7 @@ fun TvAdhanScreen(
         LavaLamp(
             modifier = Modifier.fillMaxSize(),
             containerMode = LavaContainerMode.AMBIENT_BACKGROUND,
+            mode = LavaMode.Aurora,
             speed = 0.8f
         )
 

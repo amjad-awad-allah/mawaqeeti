@@ -31,7 +31,7 @@ class NotificationScheduler @Inject constructor(
     private fun scheduleMultiPhaseAlarms(prayer: PrayerTime) {
         val prayerTime = LocalTime.parse(prayer.time, DateTimeFormatter.ofPattern("HH:mm"))
         
-        // Phases: 60, 30, 15, 5 minutes before and 0 (Athan time)
+        // Phases: 60, 30, 15, 5, 0
         val phases = listOf(60, 30, 15, 5, 0)
         
         phases.forEach { minutesBefore ->

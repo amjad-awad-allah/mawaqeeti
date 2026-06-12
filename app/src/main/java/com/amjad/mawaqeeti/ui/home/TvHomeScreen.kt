@@ -32,9 +32,9 @@ fun TvHomeScreen(
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF03070C))) {
         // Full screen ambient liquid
         LavaLamp(
-            modifier = Modifier.fillMaxSize().alpha(0.4f),
+            modifier = Modifier.fillMaxSize(),
             containerMode = LavaContainerMode.AMBIENT_BACKGROUND,
-            speed = 0.3f
+            speed = 0.5f
         )
 
         Row(

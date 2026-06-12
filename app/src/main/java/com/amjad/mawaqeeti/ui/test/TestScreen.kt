@@ -84,6 +84,12 @@ fun TestScreen(onBack: () -> Unit) {
             )
 
             TestButton(
+                text = "جدولة أذان كامل بعد 9 دقائق",
+                icon = Icons.Default.Timer,
+                onClick = { scheduleTestAlarm(context, "الظهر", 0, 540) }
+            )
+
+            TestButton(
                 text = "جدولة تنبيه ساعة (Bill) بعد 10ث",
                 icon = Icons.Default.Timer,
                 onClick = { scheduleTestAlarm(context, "الفجر", 60, 10) }
@@ -165,4 +171,6 @@ private fun scheduleTestAlarm(context: Context, prayerName: String, minutesBefor
         triggerAt,
         pendingIntent
     )
+
+    android.widget.Toast.makeText(context, "تم جدولة اختبار: $prayerName", android.widget.Toast.LENGTH_SHORT).show()
 }

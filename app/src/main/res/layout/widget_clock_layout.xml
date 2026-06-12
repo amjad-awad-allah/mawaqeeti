@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/clock_container"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="bottom"
+    android:paddingBottom="8dp"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <!-- Main Clock Time -->
+    <TextClock
+        android:id="@+id/textClockMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:format12Hour="hh:mm"
+        android:format24Hour="HH:mm"
+        android:textColor="#FFFFFF"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:includeFontPadding="false" />
+
+    <!-- Superscript Seconds (Lowered to 12dp from 20dp) -->
+    <TextClock
+        android:id="@+id/textClockSeconds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="2dp"
+        android:format12Hour="ss"
+        android:format24Hour="ss"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:alpha="0.8"
+        android:fontFamily="sans-serif-light"
+        android:includeFontPadding="false" />
+
+    <!-- AM/PM Indicator -->
+    <TextClock
+        android:id="@+id/textClockAmPm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:layout_marginStart="4dp"
+        android:format12Hour="a"
+        android:format24Hour=""
+        android:textColor="#FFFFFF"
+        android:textSize="11sp"
+        android:alpha="0.6"
+        android:fontFamily="sans-serif-medium" />
+</LinearLayout>

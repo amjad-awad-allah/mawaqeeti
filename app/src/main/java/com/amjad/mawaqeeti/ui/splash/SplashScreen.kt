@@ -52,10 +52,9 @@ fun SplashScreen(
         // lavalamb
         LavaLamp(
             modifier = Modifier.fillMaxSize(),
-            containerMode = LavaContainerMode.AMBIENT_BACKGROUND ,// No glass bottle,
+            containerMode = LavaContainerMode.AMBIENT_BACKGROUND,
             speed = 0.3f,
-            flowIntensity = 0.2f,
-
+            flowIntensity = 0.2f
         )
 
         Column(
