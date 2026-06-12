@@ -30,7 +30,20 @@ class AlarmReceiver : BroadcastReceiver() {
             val effectiveAdhanEnabled = if (minutesBefore == 0) adhanEnabled else true
 
             showNotification(context, prayerName, minutesBefore, effectiveAdhanEnabled)
+
+            // For TV/Full Screen Adhan: Launch Activity when it's exactly prayer time
+            if (minutesBefore == 0 && adhanEnabled) {
+                launchAdhanActivity(context, prayerName)
+            }
         }
+    }
+
+    private fun launchAdhanActivity(context: Context, prayerName: String) {
+        val intent = Intent(context, com.amjad.mawaqeeti.ui.MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("START_DESTINATION", "adhan_reminder/$prayerName")
+        }
+        context.startActivity(intent)
     }
 
     private fun showNotification(context: Context, prayerName: String, minutesBefore: Int, soundEnabled: Boolean) {
@@ -40,22 +53,22 @@ class AlarmReceiver : BroadcastReceiver() {
         val (soundUri, channelId, channelName) = when (minutesBefore) {
             60, 30 -> Triple(
                 Uri.parse("android.resource://${context.packageName}/raw/bill"),
-                "prayer_alerts_bill",
+                "prayer_alerts_bill_v2",
                 "تنبيهات (ساعة/نصف ساعة)"
             )
             15 -> Triple(
                 Uri.parse("android.resource://${context.packageName}/raw/notime"),
-                "prayer_alerts_notime",
+                "prayer_alerts_notime_v2",
                 "تنبيهات (15 دقيقة)"
             )
             0 -> Triple(
                 Uri.parse("android.resource://${context.packageName}/raw/athan"),
-                "prayer_alerts_athan",
-                "تنبيه الأذان"
+                "prayer_alerts_athan_full_v2",
+                "تنبيه الأذان (الكامل)"
             )
             else -> Triple(
                 RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                "prayer_alerts_default",
+                "prayer_alerts_default_v2",
                 "تنبيهات الأذان"
             )
         }
@@ -91,13 +104,26 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("تذكير الصلاة - $prayerName")
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVibrate(longArrayOf(1000, 1000, 1000))
             .setAutoCancel(true)
+
+        // For Full Screen Adhan (TV & Phone Alerts)
+        if (minutesBefore == 0 && soundEnabled) {
+            val fullScreenIntent = Intent(context, com.amjad.mawaqeeti.ui.MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("START_DESTINATION", "adhan_reminder/$prayerName")
+            }
+            val fullScreenPendingIntent = android.app.PendingIntent.getActivity(
+                context, 0, fullScreenIntent,
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.setFullScreenIntent(fullScreenPendingIntent, true)
+        }
 
         if (finalSoundUri != null) {
             builder.setSound(finalSoundUri)
