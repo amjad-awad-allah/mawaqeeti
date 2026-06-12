@@ -60,8 +60,8 @@ fun TestScreen(onBack: () -> Unit) {
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SmallTestButton("Athan", Modifier.weight(1f)) { triggerTestAlarm(context, "الفجر", 0) }
-                SmallTestButton("15m", Modifier.weight(1f)) { triggerTestAlarm(context, "الظهر", 15) }
-                SmallTestButton("Bill", Modifier.weight(1f)) { triggerTestAlarm(context, "العصر", 60) }
+                SmallTestButton("Past (-1h)", Modifier.weight(1f)) { triggerTestAlarm(context, "الظهر", 0, System.currentTimeMillis() - 3600000) }
+                SmallTestButton("Recent (-2m)", Modifier.weight(1f)) { triggerTestAlarm(context, "العصر", 0, System.currentTimeMillis() - 120000) }
             }
 
             Divider(color = Color.White.copy(alpha = 0.1f))
@@ -135,10 +135,11 @@ fun SmallTestButton(text: String, modifier: Modifier, onClick: () -> Unit) {
     }
 }
 
-private fun triggerTestAlarm(context: Context, prayerName: String, minutesBefore: Int) {
+private fun triggerTestAlarm(context: Context, prayerName: String, minutesBefore: Int, scheduledTime: Long = System.currentTimeMillis()) {
     val intent = Intent(context, AlarmReceiver::class.java).apply {
         putExtra("PRAYER_NAME", prayerName)
         putExtra("MINUTES_BEFORE", minutesBefore)
+        putExtra("SCHEDULED_TIME", scheduledTime)
     }
     context.sendBroadcast(intent)
 }

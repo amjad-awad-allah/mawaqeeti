@@ -50,9 +50,12 @@ class NotificationScheduler @Inject constructor(
     }
 
     private fun scheduleAlarm(prayerName: String, dateTime: LocalDateTime, minutesBefore: Int) {
+        val triggerAt = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("PRAYER_NAME", prayerName)
             putExtra("MINUTES_BEFORE", minutesBefore)
+            putExtra("SCHEDULED_TIME", triggerAt)
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
@@ -61,8 +64,6 @@ class NotificationScheduler @Inject constructor(
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-
-        val triggerAt = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
         try {
             alarmManager.setExactAndAllowWhileIdle(

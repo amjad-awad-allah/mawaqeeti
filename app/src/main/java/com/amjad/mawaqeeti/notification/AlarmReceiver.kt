@@ -18,6 +18,13 @@ class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val prayerName = intent.getStringExtra("PRAYER_NAME") ?: return
         val minutesBefore = intent.getIntExtra("MINUTES_BEFORE", 0)
+        val scheduledTime = intent.getLongExtra("SCHEDULED_TIME", 0L)
+
+        // Prevent "stacking" of old alarms after TV boot/time sync
+        if (scheduledTime != 0L && System.currentTimeMillis() - scheduledTime > 10 * 60 * 1000) {
+            // Alarm is more than 10 minutes late, ignore it
+            return
+        }
 
         val dataStore = DataStoreManager(context)
         runBlocking {
