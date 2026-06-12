@@ -92,8 +92,7 @@ class PrayerWidget : GlanceAppWidget() {
                 nextPrayer = next
                 activePrayer = PrayerCalculator.findActivePrayer(prayerList)
                 
-                if (next != null) {
-                    val prayerTime = LocalTime.parse(next.time, DateTimeFormatter.ofPattern("HH:mm"))
+                val prayerTime = LocalTime.parse(next.time, DateTimeFormatter.ofPattern("HH:mm"))
                     var nextPrayerDateTime = java.time.LocalDateTime.now()
                         .withHour(prayerTime.hour)
                         .withMinute(prayerTime.minute)
@@ -105,8 +104,7 @@ class PrayerWidget : GlanceAppWidget() {
                     
                     val duration = Duration.between(java.time.LocalDateTime.now(), nextPrayerDateTime)
                     targetTimeMillis = SystemClock.elapsedRealtime() + duration.toMillis()
-                }
-            } catch (e: Exception) { }
+                } catch (e: Exception) { }
         }
 
         val isPrayed = activePrayer?.isPrayed ?: false
