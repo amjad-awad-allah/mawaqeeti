@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import com.amjad.mawaqeeti.data.model.PrayerTime
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -19,6 +20,22 @@ class NotificationScheduler @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    suspend fun scheduleAllCurrentAlarms(dataStore: com.amjad.mawaqeeti.data.local.DataStoreManager, gson: com.google.gson.Gson) {
+        val json = dataStore.prayerTimesJson.first()
+        val states = dataStore.prayerStates.first()
+        if (json != null) {
+            val timings = gson.fromJson(json, com.amjad.mawaqeeti.data.model.Timings::class.java)
+            val prayerList = listOf(
+                PrayerTime("الفجر", timings.Fajr, (states["Fajr"] ?: false)),
+                PrayerTime("الظهر", timings.Dhuhr, (states["Dhuhr"] ?: false)),
+                PrayerTime("العصر", timings.Asr, (states["Asr"] ?: false)),
+                PrayerTime("المغرب", timings.Maghrib, (states["Maghrib"] ?: false)),
+                PrayerTime("العشاء", timings.Isha, (states["Isha"] ?: false))
+            )
+            scheduleAlarmsForPrayers(prayerList)
+        }
+    }
 
     fun scheduleAlarmsForPrayers(prayers: List<PrayerTime>) {
         prayers.forEach { prayer ->

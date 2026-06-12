@@ -11,6 +11,7 @@ import android.content.res.Configuration
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import com.amjad.mawaqeeti.R
 import com.amjad.mawaqeeti.data.local.DataStoreManager
@@ -23,6 +24,11 @@ class AlarmReceiver : BroadcastReceiver() {
         val prayerName = intent.getStringExtra("PRAYER_NAME") ?: return
         val minutesBefore = intent.getIntExtra("MINUTES_BEFORE", 0)
         val scheduledTime = intent.getLongExtra("SCHEDULED_TIME", 0L)
+
+        // Wake up the CPU to ensure the alert processes
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+        val wakeLock = powerManager?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Mawaqeeti:AlarmWakeLock")
+        wakeLock?.acquire(10 * 1000L) // Stay awake for 10 seconds
 
         // Prevent "stacking" of old alarms after TV boot/time sync
         if (scheduledTime != 0L && System.currentTimeMillis() - scheduledTime > 10 * 60 * 1000) {
@@ -126,9 +132,11 @@ class AlarmReceiver : BroadcastReceiver() {
             
             // Force start activity directly for immediate response on TV
             try {
+                mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 context.startActivity(mainIntent)
+                android.util.Log.d("Mawaqeeti", "startActivity called successfully")
             } catch (e: Exception) {
-                android.util.Log.e("Mawaqeeti", "Failed to start activity directly: ${e.message}")
+                android.util.Log.e("Mawaqeeti", "CRITICAL: Failed to start activity: ${e.message}")
             }
             
             builder.setFullScreenIntent(pendingIntent, true)

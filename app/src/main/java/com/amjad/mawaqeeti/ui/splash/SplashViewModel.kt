@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amjad.mawaqeeti.data.local.DataStoreManager
 import com.amjad.mawaqeeti.data.repository.PrayerRepository
+import com.amjad.mawaqeeti.notification.NotificationScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,9 @@ import javax.inject.Inject
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val repository: PrayerRepository,
-    private val dataStore: DataStoreManager
+    private val dataStore: DataStoreManager,
+    private val scheduler: NotificationScheduler,
+    private val gson: com.google.gson.Gson
 ) : ViewModel() {
 
     private val _isReady = MutableStateFlow(false)
@@ -34,7 +37,10 @@ class SplashViewModel @Inject constructor(
             // 2. Logic for Streak
             updateStreakLogic()
             
-            // 3. Mark as ready
+            // 3. Schedule all alarms for the day
+            scheduler.scheduleAllCurrentAlarms(dataStore, gson)
+            
+            // 4. Mark as ready
             _isReady.value = true
         }
     }

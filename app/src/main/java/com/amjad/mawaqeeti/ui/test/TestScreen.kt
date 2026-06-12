@@ -157,14 +157,16 @@ private fun scheduleTestAlarm(context: Context, prayerName: String, minutesBefor
         putExtra("MINUTES_BEFORE", minutesBefore)
     }
 
+    val requestCode = prayerName.hashCode() + minutesBefore
     val pendingIntent = PendingIntent.getBroadcast(
         context,
-        System.currentTimeMillis().toInt(), // Unique request code
+        requestCode,
         intent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
     val triggerAt = System.currentTimeMillis() + (secondsDelayed * 1000)
+    android.util.Log.d("Mawaqeeti", "Scheduling test for $prayerName in $secondsDelayed seconds at $triggerAt with code $requestCode")
 
     alarmManager.setExactAndAllowWhileIdle(
         AlarmManager.RTC_WAKEUP,
@@ -172,5 +174,5 @@ private fun scheduleTestAlarm(context: Context, prayerName: String, minutesBefor
         pendingIntent
     )
 
-    android.widget.Toast.makeText(context, "تم جدولة اختبار: $prayerName", android.widget.Toast.LENGTH_SHORT).show()
+    android.widget.Toast.makeText(context, "تم جدولة اختبار: $prayerName بعد $secondsDelayed ث", android.widget.Toast.LENGTH_SHORT).show()
 }
