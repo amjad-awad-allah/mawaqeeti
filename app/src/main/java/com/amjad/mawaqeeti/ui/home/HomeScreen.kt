@@ -23,7 +23,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import com.amjad.mawaqeeti.R
 import com.amjad.mawaqeeti.data.model.PrayerTime
+import com.amjad.mawaqeeti.util.LocaleUtils
 import com.example.lavalamp.LavaContainerMode
 import com.example.lavalamp.LavaLamp
 import com.example.lavalamp.LavaLampStyle
@@ -125,15 +128,19 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("الصلوات المفروضة", style = MaterialTheme.typography.titleLarge, color = Color.White, fontWeight = FontWeight.Bold)
-                    Text("اليوم", color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp)
+                    Text(stringResource(R.string.daily_prayers), style = MaterialTheme.typography.titleLarge, color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.today), color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 uiState.prayers.forEach { prayer ->
+                    val displayName = LocaleUtils.getPrayerDisplayName(
+                        context = androidx.compose.ui.platform.LocalContext.current,
+                        englishKey = LocaleUtils.getEnglishKey(prayer.name)
+                    )
                     ModernLiquidPrayerItem(
-                        prayer = prayer,
+                        prayer = prayer.copy(name = displayName),
                         isNext = uiState.nextPrayer?.name == prayer.name,
                         onPrayed = { viewModel.togglePrayer(prayer.name, !prayer.isPrayed) }
                     )
@@ -186,7 +193,12 @@ fun LiquidCountdownCard(uiState: HomeUiState) {
                 shape = RoundedCornerShape(20.dp)
             ) {
                 Text(
-                    text = uiState.nextPrayer?.let { "الصلاة القادمة: ${it.name}" } ?: "تحميل...",
+                    text = uiState.nextPrayer?.let {
+                        // Get the localized display name for the next prayer
+                        val ctx = androidx.compose.ui.platform.LocalContext.current
+                        val displayName = LocaleUtils.getPrayerDisplayName(ctx, LocaleUtils.getEnglishKey(it.name))
+                        stringResource(R.string.next_prayer_label, displayName)
+                    } ?: stringResource(R.string.loading),
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.White
@@ -260,7 +272,7 @@ fun ModernLiquidPrayerItem(prayer: PrayerTime, isNext: Boolean, onPrayed: () -> 
                     color = Color(0xFF64FFDA).copy(alpha = 0.2f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("الآن", modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), color = Color(0xFF64FFDA), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.now_badge), modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), color = Color(0xFF64FFDA), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -298,8 +310,8 @@ fun CompletionOverlay(onDismiss: () -> Unit) {
                 )
             }
             Spacer(Modifier.height(24.dp))
-            Text("🎉 ما شاء الله", style = MaterialTheme.typography.displaySmall, color = Color.White, fontWeight = FontWeight.Bold)
-            Text("أتممت جميع صلوات اليوم بنجاح", color = Color.White.copy(alpha = 0.7f))
+            Text(stringResource(R.string.mashallah), style = MaterialTheme.typography.displaySmall, color = Color.White, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.all_prayers_done), color = Color.White.copy(alpha = 0.7f))
             Spacer(Modifier.height(40.dp))
             Button(
                 onClick = onDismiss,
@@ -307,7 +319,7 @@ fun CompletionOverlay(onDismiss: () -> Unit) {
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.height(56.dp).padding(horizontal = 32.dp)
             ) {
-                Text("الحمد لله", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text(stringResource(R.string.alhamdulillah), color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
         }
     }

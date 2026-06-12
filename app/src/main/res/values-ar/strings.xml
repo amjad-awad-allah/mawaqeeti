@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">مواقيتي</string>
+    <string name="widget_name">مواقيتي</string>
+
+    <!-- Prayer Names (display) -->
+    <string name="prayer_fajr">الفجر</string>
+    <string name="prayer_dhuhr">الظهر</string>
+    <string name="prayer_asr">العصر</string>
+    <string name="prayer_maghrib">المغرب</string>
+    <string name="prayer_isha">العشاء</string>
+
+    <!-- Home Screen -->
+    <string name="app_title">مواقيتي</string>
+    <string name="next_prayer_label">الصلاة القادمة: %1$s</string>
+    <string name="loading">تحميل…</string>
+    <string name="daily_prayers">الصلوات المفروضة</string>
+    <string name="today">اليوم</string>
+    <string name="now_badge">الآن</string>
+    <string name="mashallah">🎉 ما شاء الله</string>
+    <string name="all_prayers_done">أتممت جميع صلوات اليوم بنجاح</string>
+    <string name="alhamdulillah">الحمد لله</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="back">رجوع</string>
+    <string name="location_section">الموقع والمنطقة</string>
+    <string name="city_label">المدينة</string>
+    <string name="country_label">الدولة</string>
+    <string name="save_changes">حفظ التغييرات</string>
+    <string name="offsets_section">تعديل التواقيت (دقائق)</string>
+    <string name="performance_section">أداء الخلفية السائلة</string>
+    <string name="mode_full">أداء كامل (بصمة بصرية قصوى)</string>
+    <string name="mode_balanced">متوازن (موصى به)</string>
+    <string name="mode_saver">توفير الطاقة</string>
+    <string name="notifications_section">التنبيهات والأذان</string>
+    <string name="enable_notifications">تفعيل التنبيهات</string>
+    <string name="enable_notifications_sub">تنبيهات قبل موعد الصلاة</string>
+    <string name="enable_adhan">صوت الأذان</string>
+    <string name="enable_adhan_sub">تشغيل الأذان عند الموعد</string>
+    <string name="widget_section">الإضافات (Widget)</string>
+    <string name="widget_desc">أضف تطبيق \'مواقيتي\' المصغر مباشرة إلى شاشتك الرئيسية للوصول السريع.</string>
+    <string name="add_widget">إضافة الويدجت للشاشة الرئيسية</string>
+    <string name="widget_not_supported">واجهة جهازك لا تدعم الإضافة التلقائية، يرجى إضافته يدوياً</string>
+    <string name="language_section">اللغة</string>
+    <string name="language_english">English</string>
+    <string name="language_arabic">العربية</string>
+    <string name="language_restart_note">أعد تشغيل التطبيق لتطبيق تغيير اللغة.</string>
+
+    <!-- Widget -->
+    <string name="prayed_button">أديت الصلاة ✅</string>
+    <string name="loading_widget">تحميل…</string>
+    <string name="praised_widget">تقبل الله منك 🤲</string>
+
+    <!-- Adhan Screen -->
+    <string name="adhan_time">حان وقت الصلاة</string>
+    <string name="adhan_done">تم</string>
+
+    <!-- Toast messages -->
+    <string name="alarm_scheduled">تم جدولة التنبيه: %1$s</string>
+    <string name="test_alarm_scheduled">تم جدولة اختبار: %1$s بعد %2$d ث</string>
+</resources>

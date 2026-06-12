@@ -1,49 +1,81 @@
-# Mawaqeeti | مواقيتي 🕌
+# Mawaqeeti 🕌
 
-تطبيق صلاتي الذكي للأندرويد وتلفاز مخصص (Android TV) يتميز بتصميمه العصري، ويدجت حي، ونظام تنبيهات متقدم لضمان عدم فوات أي صلاة.
+> **A smart, modern Android prayer companion — beautifully designed for both phones and Android TV.**
 
-![Mawaqeeti Banner](https://img.shields.io/badge/Android-TV%20Support-emerald?style=for-the-badge&logo=android)
-![Kotlin](https://img.shields.io/badge/Kotlin-Stable-blue?style=for-the-badge&logo=kotlin)
-![Compose](https://img.shields.io/badge/Jetpack-Compose-navy?style=for-the-badge&logo=jetpackcompose)
+Mawaqeeti delivers precise daily prayer times, a live home-screen widget, multi-phase alarm reminders, and a full-screen Adhan experience on Android TV — all wrapped in a stunning glassmorphism UI.
 
-## ✨ المميزات الرئيسية
+![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Android%20TV-brightgreen?style=for-the-badge&logo=android)
+![Language](https://img.shields.io/badge/Language-Kotlin-blue?style=for-the-badge&logo=kotlin)
+![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-navy?style=for-the-badge&logo=jetpackcompose)
+![Multilingual](https://img.shields.io/badge/Languages-English%20%7C%20Arabic-orange?style=for-the-badge)
 
-*   **📺 أذان التلفاز الذكي:** واجهة أذان كاملة تظهر تلقائياً بملء الشاشة على أجهزة Android TV عند دخول وقت الصلاة.
-*   **⏱️ ويدجت حي (Live Widget):** عداد تنازلي حي في الويدجت يعرض الوقت المتبقي للصلاة القادمة ثانية بثانية.
-*   **🔔 تنبيهات متعددة المراحل:** تنبيهات قبل الصلاة بـ 60 و 30 و 15 و 5 دقائق لمساعدتك في الاستعداد للصلاة.
-*   **🧪 مختبر التنبيهات (Test Lab):** واجهة مخصصة لاختبار جميع أنواع التنبيهات والأذان بشكل فوري أو مجدول لضمان الجودة.
-*   **🌙 واجهة Aurora:** تصميم زجاجي عصري مع خلفيات متغيرة تتناسب مع هوية التطبيق.
+---
 
-## 🛠️ التقنيات المستخدمة
+## ✨ Key Features
 
-- **Architecture:** MVVM (Model-View-ViewModel) + Repository Pattern.
-- **Dependency Injection:** Hilt (Dagger).
-- **UI Framework:** Jetpack Compose (Modern and Reactive UI).
-- **Widgets:** Android Glance (Compose-based Remote Views).
-- **Storage:** Jetpack DataStore (Preferences and Proto).
-- **Asynchronous Code:** Kotlin Coroutines & Flow.
+| Feature | Description |
+|---|---|
+| 📺 **Android TV Adhan** | Full-screen Adhan UI auto-launches on TV at prayer time |
+| ⏱️ **Live Countdown Widget** | Real-time second-by-second countdown on your home screen |
+| 🔔 **Multi-Phase Reminders** | Alerts at 60, 30, 15, 5 min before each prayer |
+| 🌍 **Bilingual** | Full English & Arabic support with auto RTL/LTR layout |
+| 🧪 **Test Lab** | Schedule a test alarm in 9 seconds or 9 minutes for instant verification |
+| 🌊 **Aurora UI** | Dynamic Lava Lamp background that reacts to your prayer progress |
+| 📍 **Global Prayer Times** | Powered by the Aladhan API with multiple calculation methods |
 
-## 🚀 كيف تبدأ؟
+---
 
-### المتطلبات الأساسية
-*   Android Studio Ladybug (أو أحدث).
-*   JDK 17+.
-*   تطبيق يعمل على Android 8.0 (API 26) أو أحدث.
+## 🛠️ Tech Stack
 
-### تشغيل الاختبارات
-يمكنك تشغيل اختبارات الوحدة للتأكد من سلامة المنطق البرمجي:
+- **Architecture:** MVVM + Repository Pattern
+- **Dependency Injection:** Hilt (Dagger)
+- **UI Framework:** Jetpack Compose
+- **Home Screen Widget:** Glance (Compose-based RemoteViews)
+- **Storage:** Jetpack DataStore (Preferences)
+- **Async:** Kotlin Coroutines & Flow
+- **Network:** Retrofit + Gson (Aladhan API)
+- **Background Tasks:** AlarmManager with `setExactAndAllowWhileIdle` + WakeLock
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Android Studio Ladybug or newer
+- JDK 17+
+- Android 8.0+ (API 26) device or emulator
+
+### Run Unit Tests
 ```bash
-./gradlew test
+./gradlew :app:testDebugUnitTest
 ```
 
-### التثبيت
-للتثبيت المباشر على جهازك أو المحاكي:
+### Install on Device / TV
 ```bash
 ./gradlew installDebug
 ```
 
-## 📝 ملاحظات التشغيل على التلفاز
-لكي تظهر واجهة الأذان تلقائياً على التلفاز، يرجى منح التطبيق صلاحية **"الظهور فوق التطبيقات" (Display over other apps)** عند فتحه لأول مرة.
+---
+
+## 📱 Language Support
+
+Switch between **English** (default) and **Arabic** from **Settings → Language**.  
+The app automatically applies the correct text direction:
+- **English** → Left-to-Right (LTR)
+- **Arabic** → Right-to-Left (RTL)
 
 ---
-تم التطوير بواسطة **أمجد** بكل حب لخدمة المصلين. 🤲
+
+## 📺 Android TV Notes
+
+For the full-screen Adhan to appear automatically on TV, grant the **"Display over other apps"** permission when prompted on first launch. Without this, the system restricts foreground window launching.
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+---
+
+*Built with ❤️ by **Amjad** — may it never let you miss a prayer.* 🤲

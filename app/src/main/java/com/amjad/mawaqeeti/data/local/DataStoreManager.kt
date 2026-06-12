@@ -45,6 +45,7 @@ class DataStoreManager @Inject constructor(
         
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val ADHAN_ENABLED = booleanPreferencesKey("adhan_enabled")
+        val LANGUAGE_CODE = stringPreferencesKey("language_code")
     }
 
     // Getters
@@ -57,6 +58,7 @@ class DataStoreManager @Inject constructor(
 
     val notificationsEnabled: Flow<Boolean> = context.dataStore.data.map { it[NOTIFICATIONS_ENABLED] ?: true }
     val adhanEnabled: Flow<Boolean> = context.dataStore.data.map { it[ADHAN_ENABLED] ?: true }
+    val languageCode: Flow<String> = context.dataStore.data.map { it[LANGUAGE_CODE] ?: "en" }
 
     val prayerStates: Flow<Map<String, Boolean>> = context.dataStore.data.map { prefs ->
         mapOf(
@@ -155,5 +157,9 @@ class DataStoreManager @Inject constructor(
 
     suspend fun setAdhanEnabled(enabled: Boolean) {
         context.dataStore.edit { it[ADHAN_ENABLED] = enabled }
+    }
+
+    suspend fun setLanguageCode(code: String) {
+        context.dataStore.edit { it[LANGUAGE_CODE] = code }
     }
 }

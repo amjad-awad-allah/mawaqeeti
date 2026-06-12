@@ -26,6 +26,7 @@ class SettingsViewModel @Inject constructor(
 
     val notificationsEnabled = dataStore.notificationsEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), true)
     val adhanEnabled = dataStore.adhanEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), true)
+    val languageCode = dataStore.languageCode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "en")
 
     fun updateLocation(city: String, country: String, method: Int) {
         viewModelScope.launch {
@@ -60,6 +61,12 @@ class SettingsViewModel @Inject constructor(
     fun setAdhanEnabled(enabled: Boolean) {
         viewModelScope.launch {
             dataStore.setAdhanEnabled(enabled)
+        }
+    }
+
+    fun setLanguageCode(code: String) {
+        viewModelScope.launch {
+            dataStore.setLanguageCode(code)
         }
     }
 }

@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,6 +26,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import com.amjad.mawaqeeti.R
+import com.amjad.mawaqeeti.util.LocaleUtils
 import com.amjad.mawaqeeti.widget.PrayerWidgetReceiver
 import com.example.lavalamp.LavaContainerMode
 
@@ -38,6 +41,7 @@ fun SettingsScreen(
     val country by viewModel.selectedCountry.collectAsState()
     val method by viewModel.selectedMethod.collectAsState()
     val lavaMode by viewModel.lavaMode.collectAsState()
+    val languageCode by viewModel.languageCode.collectAsState()
 
     val fOff by viewModel.fajrOffset.collectAsState()
     val dOff by viewModel.dhuhrOffset.collectAsState()
@@ -64,10 +68,10 @@ fun SettingsScreen(
             topBar = {
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-                    title = { Text("الإعدادات", color = Color.White, fontWeight = FontWeight.ExtraBold) },
+                    title = { Text(stringResource(R.string.settings_title), color = Color.White, fontWeight = FontWeight.ExtraBold) },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "رجوع", tint = Color.White)
+                            Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                         }
                     }
                 )
@@ -82,10 +86,10 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 // Location Section
-                SettingsSection(title = "الموقع والمنطقة", icon = Icons.Default.LocationOn) {
-                    ModernTextField(value = tempCity, onValueChange = { tempCity = it }, label = "المدينة")
+                SettingsSection(title = stringResource(R.string.location_section), icon = Icons.Default.LocationOn) {
+                    ModernTextField(value = tempCity, onValueChange = { tempCity = it }, label = stringResource(R.string.city_label))
                     Spacer(Modifier.height(12.dp))
-                    ModernTextField(value = tempCountry, onValueChange = { tempCountry = it }, label = "الدولة")
+                    ModernTextField(value = tempCountry, onValueChange = { tempCountry = it }, label = stringResource(R.string.country_label))
                     Spacer(Modifier.height(16.dp))
                     Button(
                         onClick = { viewModel.updateLocation(tempCity, tempCountry, method) },
@@ -93,21 +97,21 @@ fun SettingsScreen(
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF64FFDA))
                     ) {
-                        Text("حفظ التغييرات", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.save_changes), color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
 
                 // Offsets Section
-                SettingsSection(title = "تعديل التواقيت (دقائق)", icon = Icons.Default.Schedule) {
-                    OffsetItem("الفجر", fOff) { viewModel.updateOffset("Fajr", it) }
-                    OffsetItem("الظهر", dOff) { viewModel.updateOffset("Dhuhr", it) }
-                    OffsetItem("العصر", aOff) { viewModel.updateOffset("Asr", it) }
-                    OffsetItem("المغرب", mOff) { viewModel.updateOffset("Maghrib", it) }
-                    OffsetItem("العشاء", iOff) { viewModel.updateOffset("Isha", it) }
+                SettingsSection(title = stringResource(R.string.offsets_section), icon = Icons.Default.Schedule) {
+                    OffsetItem(stringResource(R.string.prayer_fajr), fOff) { viewModel.updateOffset("Fajr", it) }
+                    OffsetItem(stringResource(R.string.prayer_dhuhr), dOff) { viewModel.updateOffset("Dhuhr", it) }
+                    OffsetItem(stringResource(R.string.prayer_asr), aOff) { viewModel.updateOffset("Asr", it) }
+                    OffsetItem(stringResource(R.string.prayer_maghrib), mOff) { viewModel.updateOffset("Maghrib", it) }
+                    OffsetItem(stringResource(R.string.prayer_isha), iOff) { viewModel.updateOffset("Isha", it) }
                 }
 
                 // Performance Section
-                SettingsSection(title = "أداء الخلفية السائلة", icon = Icons.Default.AutoAwesome) {
+                SettingsSection(title = stringResource(R.string.performance_section), icon = Icons.Default.AutoAwesome) {
                     val modes = listOf("FULL", "BALANCED", "BATTERY_SAVER")
                     modes.forEach { mode ->
                         val isSelected = lavaMode == mode
@@ -132,9 +136,9 @@ fun SettingsScreen(
                                 )
                                 Text(
                                     text = when(mode) {
-                                        "FULL" -> "أداء كامل (بصمة بصرية قصوى)"
-                                        "BALANCED" -> "متوازن (موصى به)"
-                                        else -> "توفير الطاقة"
+                                        "FULL" -> stringResource(R.string.mode_full)
+                                        "BALANCED" -> stringResource(R.string.mode_balanced)
+                                        else -> stringResource(R.string.mode_saver)
                                     },
                                     color = if (isSelected) Color(0xFF64FFDA) else Color.White.copy(alpha = 0.7f),
                                     modifier = Modifier.padding(start = 8.dp)
@@ -145,27 +149,27 @@ fun SettingsScreen(
                 }
 
                 // Notifications Section
-                SettingsSection(title = "التنبيهات والأذان", icon = Icons.Default.Notifications) {
+                SettingsSection(title = stringResource(R.string.notifications_section), icon = Icons.Default.Notifications) {
                     ToggleSettingItem(
-                        title = "تفعيل التنبيهات",
-                        subtitle = "تنبيهات قبل موعد الصلاة",
+                        title = stringResource(R.string.enable_notifications),
+                        subtitle = stringResource(R.string.enable_notifications_sub),
                         checked = notificationsEnabled,
                         onCheckedChange = { viewModel.setNotificationsEnabled(it) }
                     )
                     Spacer(Modifier.height(12.dp))
                     ToggleSettingItem(
-                        title = "صوت الأذان",
-                        subtitle = "تشغيل الأذان عند الموعد",
+                        title = stringResource(R.string.enable_adhan),
+                        subtitle = stringResource(R.string.enable_adhan_sub),
                         checked = adhanEnabled,
                         onCheckedChange = { viewModel.setAdhanEnabled(it) }
                     )
                 }
 
                 // Widget Management Section
-                SettingsSection(title = "الإضافات (Widget)", icon = Icons.Default.Widgets) {
-                    val context = LocalContext.current
+                val context = LocalContext.current
+                SettingsSection(title = stringResource(R.string.widget_section), icon = Icons.Default.Widgets) {
                     Text(
-                        "أضف تطبيق 'مواقيتي' المصغر مباشرة إلى شاشتك الرئيسية للوصول السريع.",
+                        stringResource(R.string.widget_desc),
                         color = Color.White.copy(alpha = 0.6f),
                         fontSize = 13.sp,
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -178,7 +182,53 @@ fun SettingsScreen(
                     ) {
                         Icon(Icons.Default.Add, null, tint = Color.White)
                         Spacer(Modifier.width(8.dp))
-                        Text("إضافة الويدجت للشاشة الرئيسية", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.add_widget), color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                // Language Section
+                SettingsSection(title = stringResource(R.string.language_section), icon = Icons.Default.Language) {
+                    Text(
+                        stringResource(R.string.language_restart_note),
+                        color = Color.White.copy(alpha = 0.5f),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                    listOf("en" to stringResource(R.string.language_english),
+                           "ar" to stringResource(R.string.language_arabic)).forEach { (code, label) ->
+                        val isSelected = languageCode == code
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .padding(vertical = 4.dp)
+                                .clickable {
+                                    viewModel.setLanguageCode(code)
+                                    LocaleUtils.restartApp(context)
+                                },
+                            color = if (isSelected) Color(0xFF64FFDA).copy(alpha = 0.1f) else Color.Transparent,
+                            shape = RoundedCornerShape(12.dp),
+                            border = if (isSelected) BorderStroke(1.dp, Color(0xFF64FFDA).copy(alpha = 0.3f)) else null
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = isSelected,
+                                    onClick = {
+                                        viewModel.setLanguageCode(code)
+                                        LocaleUtils.restartApp(context)
+                                    },
+                                    colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF64FFDA))
+                                )
+                                Text(
+                                    text = label,
+                                    color = if (isSelected) Color(0xFF64FFDA) else Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -195,7 +245,7 @@ fun requestPinAppWidget(context: Context) {
     if (appWidgetManager.isRequestPinAppWidgetSupported) {
         appWidgetManager.requestPinAppWidget(myProvider, null, null)
     } else {
-        Toast.makeText(context, "واجهة جهازك لا تدعم الإضافة التلقائية، يرجى إضافته يدوياً", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.widget_not_supported), Toast.LENGTH_SHORT).show()
     }
 }
 

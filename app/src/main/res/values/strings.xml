@@ -1,4 +1,61 @@
 <resources>
     <string name="app_name">Mawaqeeti</string>
-    <string name="widget_name">مواقيتي</string>
+    <string name="widget_name">Mawaqeeti</string>
+
+    <!-- Prayer Names (display) -->
+    <string name="prayer_fajr">Fajr</string>
+    <string name="prayer_dhuhr">Dhuhr</string>
+    <string name="prayer_asr">Asr</string>
+    <string name="prayer_maghrib">Maghrib</string>
+    <string name="prayer_isha">Isha</string>
+
+    <!-- Home Screen -->
+    <string name="app_title">Mawaqeeti</string>
+    <string name="next_prayer_label">Next Prayer: %1$s</string>
+    <string name="loading">Loading…</string>
+    <string name="daily_prayers">Daily Prayers</string>
+    <string name="today">Today</string>
+    <string name="now_badge">Now</string>
+    <string name="mashallah">🎉 Masha\'Allah</string>
+    <string name="all_prayers_done">You\'ve completed all prayers today!</string>
+    <string name="alhamdulillah">Alhamdulillah</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="back">Back</string>
+    <string name="location_section">Location &amp; Region</string>
+    <string name="city_label">City</string>
+    <string name="country_label">Country</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="offsets_section">Time Adjustments (minutes)</string>
+    <string name="performance_section">Liquid Background Performance</string>
+    <string name="mode_full">Full (Maximum Visual Experience)</string>
+    <string name="mode_balanced">Balanced (Recommended)</string>
+    <string name="mode_saver">Battery Saver</string>
+    <string name="notifications_section">Alerts &amp; Adhan</string>
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="enable_notifications_sub">Reminders before prayer time</string>
+    <string name="enable_adhan">Adhan Sound</string>
+    <string name="enable_adhan_sub">Play Adhan at prayer time</string>
+    <string name="widget_section">Home Screen Widget</string>
+    <string name="widget_desc">Add the Mawaqeeti widget directly to your home screen for quick access.</string>
+    <string name="add_widget">Add Widget to Home Screen</string>
+    <string name="widget_not_supported">Your launcher doesn\'t support auto-pinning. Please add it manually.</string>
+    <string name="language_section">Language</string>
+    <string name="language_english">English</string>
+    <string name="language_arabic">العربية</string>
+    <string name="language_restart_note">Restart the app to apply the language change.</string>
+
+    <!-- Widget -->
+    <string name="prayed_button">Prayed ✅</string>
+    <string name="loading_widget">Loading…</string>
+    <string name="praised_widget">May Allah accept 🤲</string>
+
+    <!-- Adhan Screen -->
+    <string name="adhan_time">Prayer Time</string>
+    <string name="adhan_done">Done</string>
+
+    <!-- Toast messages -->
+    <string name="alarm_scheduled">Alarm scheduled: %1$s</string>
+    <string name="test_alarm_scheduled">Test scheduled: %1$s in %2$d seconds</string>
 </resources>

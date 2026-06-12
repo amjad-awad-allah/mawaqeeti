@@ -15,6 +15,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import com.amjad.mawaqeeti.data.local.DataStoreManager
+import com.amjad.mawaqeeti.util.LocaleUtils
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -48,6 +52,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private var showOverlayDialog by mutableStateOf(false)
+
+    override fun attachBaseContext(newBase: Context) {
+        // Read saved language synchronously (only runs once at startup, acceptable here)
+        val langCode = runBlocking {
+            DataStoreManager(newBase).languageCode.first()
+        }
+        super.attachBaseContext(LocaleUtils.applyLanguage(newBase, langCode))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
